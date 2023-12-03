@@ -1,20 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useCallback } from 'react'
+import { View } from 'react-native'
+import { Provider } from 'react-redux'
+import { useFonts } from 'expo-font'
+import * as SplashScreen from 'expo-splash-screen'
+
+import { store } from './src/redux/store'
+import AppNavigator from './src/navigation/AppNavigator'
+import layoutStyles from './src/decorations/styles/layoutStyles'
+
+SplashScreen.preventAutoHideAsync()
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [fontsLoaded] = useFonts({
+    'PlusJakartaSans-Italic': require('./src/assets/fonts/PlusJakartaSans-Italic.ttf'),
+    'PlusJakartaSans-Regular': require('./src/assets/fonts/PlusJakartaSans-Regular.ttf'),
+    'PlusJakartaSans-Medium': require('./src/assets/fonts/PlusJakartaSans-Medium.ttf'),
+    'PlusJakartaSans-SemiBold': require('./src/assets/fonts/PlusJakartaSans-SemiBold.ttf'),
+    'PlusJakartaSans-Bold': require('./src/assets/fonts/PlusJakartaSans-Bold.ttf'),
+  })
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync()
+    }
+  }, [fontsLoaded])
+
+  if (!fontsLoaded) {
+    return null
+  }
+
+  return (
+    <View style={layoutStyles.flexFull} onLayout={onLayoutRootView}>
+      <Provider store={store}>
+        <AppNavigator />
+      </Provider>
+    </View>
+  )
+}
